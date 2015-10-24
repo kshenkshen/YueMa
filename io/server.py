@@ -98,10 +98,9 @@ def update(sid, data):
     pass
     sio.emit('Update', data, room=UserMatches[sid], namespace='/YueMa');
 
-@sio.on('Commit', namespace='/YueMa')
-def commit(sid, data):
+@sio.on('Push', namespace='/YueMa')
+def push(sid, data):
 
-    pass
     sio.emit('Push', data, room=UserMatches[sid], namespace='/YueMa');
 
 @sio.on('Submit', namespace='/YueMa')
@@ -124,9 +123,17 @@ def submit(sid, data):
     sio.emit('Result', data, room=sid, namespace='/YueMa');
     sio.emit('Result', data, room=pairSid, namespace='/YueMa');
 
+@sio.on('Evaluate', namespace='/YueMa')
+def evaluate(sid, data):
+    print("INFO_EVALUATE");
+
+    pairSid = UserMatches[sid];
+
+    sio.emit('Evaluate', data, room=pairSid, namespace='/YueMa');
+
 @sio.on('Message', namespace='/YueMa')
 def message(sid, data):
-    print("INFO_SUBMIT");
+    print("INFO_MESSAGE");
 
     pairSid = UserMatches[sid];
 

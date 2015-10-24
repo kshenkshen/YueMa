@@ -9,6 +9,7 @@
 			<button ms-click="ready()">Ready</button>
 			<div ms-html='task'></div>
 			<div>{{ countdown / 1000 }}</div>
+			<textarea ms-duplex="code" ms-input="update(event)"></textarea>
 			<button ms-click="submit()">Submit</button>
 			<div>{{ score }}</div>
 			<input type="text" ms-duplex="msg" /><br />
@@ -19,17 +20,29 @@
 		<script type="text/javascript" src="https://cdn.rawgit.com/RubyLouvre/avalon/master/dist/avalon.js"></script>
 		<script type="text/javascript">
 
+		function input(event) {
+
+			console.log(event);
+
+		}
+
 		var YueMa = avalon.define({
 			$id: 'YueMa',
 			username: '',
 			task: '',
 			deadline: 0,
+			code: '',
 			countdown: 0,
 			score: 0,
 			msg: '',
 			ready: function() {
 				window.Socket.emit('Ready', {
 					username: YueMa.username
+				});
+			},
+			update: function() {
+				window.Socket.emit('Push', {
+					code: YueMa.code
 				});
 			},
 			submit: function() {
@@ -91,6 +104,15 @@
 
 			console.log('Acquire');
 			console.log(data);
+
+		});
+
+		Socket.on('Push', function(data) {
+
+			console.log('Push');
+			console.log(data);
+
+			YueMa.code = data.code;
 
 		});
 

@@ -10,16 +10,8 @@
 }
 ```
 
-`Update`
-更新座标
-```javascript
-{
-	charAt: 1,
-}
-```
-
-`Commit`
-保存
+`Push`
+推送完整代码
 ```javascript
 {
 	code: "",
@@ -54,11 +46,11 @@
 `Release`
 失去控制权
 
-`Update`
-更新座标
+`Push`
+推送完整代码
 ```javascript
 {
-	charAt: 1,
+	code: "",
 }
 ```
 
