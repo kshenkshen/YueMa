@@ -37,7 +37,8 @@
 			msg: '',
 			ready: function() {
 				window.Socket.emit('Ready', {
-					username: YueMa.username
+					username: YueMa.username,
+					difficulty: 0,
 				});
 			},
 			update: function() {

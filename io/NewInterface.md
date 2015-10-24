@@ -7,6 +7,8 @@
 ```javascript
 {
 	username: "",
+	difficulty: 1,
+	//language: "",
 }
 ```
 
