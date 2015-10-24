@@ -1,15 +1,24 @@
-Given n points on a 2D plane, find the maximum number of points that lie on the same straight line.
+<p><strong>描述</strong></p>
 
-输入
-每行两个整数，点的个数小于1000，大小小于1w
+<p>Given n points on a 2D plane, find the maximum number of points that lie on the same straight line.</p>
 
-输出
-一个整数，即答案
+<p><strong>输入</strong></p>
 
-样例
-Input：
-0 0
-1 1
+<p>每行两个整数，点的个数小于1000，大小小于1w</p>
 
-Output：
-2
+<p><strong>输出</strong></p>
+
+<p>一个整数，即答案</p>
+
+<p>样例</p>
+
+<p><strong>Input</strong></p>
+
+<p>0 0</p>
+
+<p>1 1</p>
+
+<p><strong>Output</strong></p>
+
+<p>2</p>
+
