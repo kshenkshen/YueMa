@@ -3,34 +3,102 @@
 		<title>IO</title>
 	</head>
 	<body>
-		<div>
+		<div ms-controller="YueMa">
 			
-		lalala.
+			<input type="text" ms-duplex="username" /><br />
+			<button ms-click="ready()">Ready</button>
+			<div ms-html='task'></div>
+			<div>{{ countdown / 1000 }}</div>
+			<button ms-click="submit()">Submit</button>
+			<div>{{ score }}</div>
 
 		</div>
-		<script type="text/javascript" src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+		<script type="text/javascript" src="https://cdn.Socket.io/socket.io-1.3.7.js"></script>
+		<script type="text/javascript" src="https://cdn.rawgit.com/RubyLouvre/avalon/master/dist/avalon.js"></script>
 		<script type="text/javascript">
 
-		var namespace = "/YueMa";
-		var socket = io.connect("http://" + document.domain + ":" + location.port + namespace);
+		var YueMa = avalon.define({
+			$id: 'YueMa',
+			username: '',
+			task: '',
+			deadline: 0,
+			countdown: 0,
+			score: 0,
+			ready: function() {
+				window.Socket.emit('Ready', {
+					username: YueMa.username
+				});
+			},
+			submit: function() {
+				window.Socket.emit('Submit', {});
+			},
+		})
 
-		socket.on("connect", function() {
+		var namespace = '/YueMa';
+		window.Socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
 
-			console.log("INFO_CONNECTED");
+		Socket.on('connect', function() {
 
-			socket.emit("get_profile", {});
+			console.log('INFO_CONNECTED');
 
 		});
 
-		socket.on("error", function() {
+		Socket.on('error', function() {
 
-			console.log("ERROR_CONNECTING");
+			console.log('ERROR_CONNECTING');
 
 		});
 
-		socket.on("profile", function(data) {
+		Socket.on('disconnect', function() {
 
+			console.log('INFO_DISCONNECTED');
+
+		});
+
+		Socket.on('Start', function(data) {
+
+			console.log('Start');
 			console.log(data);
+			YueMa.task = data.task;
+			YueMa.deadline = data.deadline;
+			YueMa.countdown = data.deadline;
+
+			var countdown = function() {
+
+				YueMa.countdown -= 100;
+
+				if(YueMa.countdown >= 100) setTimeout(countdown, 100);
+				else {
+					YueMa.countdown = 0;
+					YueMa.submit();
+				}
+
+			};
+
+			countdown();
+
+		});
+
+		Socket.on('Acquire', function(data) {
+
+			console.log('Acquire');
+			console.log(data);
+
+		});
+
+		Socket.on('Release', function(data) {
+
+			console.log('Release');
+			console.log(data);
+
+		});
+
+		Socket.on('Result', function(data) {
+
+			console.log('Result');
+			console.log(data);
+
+			YueMa.score = data.score;
 
 		});
 
