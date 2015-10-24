@@ -22,7 +22,7 @@ code: base64编码后的代码
 ##### Response
 ```json
 {
-  "success": True,
+  "success": true,
   "err_code": 0,
   "fid": "7abd35c9146fa4b56a2b73667b91d6ed"
 }
@@ -43,8 +43,8 @@ fid: submit 时返回的 fid
 ##### Response
 ```json
 {
-  'ac': True,
-  'status_code': 0
+  "ac": true,
+  "status_code": 0
 }
 ```
 
@@ -59,8 +59,8 @@ difficulty: 题目难度, 0-2
 ##### Response
 ```json
 {
-  'pid': 1,
-  'desc': "题目描述，没有标题"
+  "pid": 1,
+  "desc": "题目描述，没有标题"
 }
 ```
 
