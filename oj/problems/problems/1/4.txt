@@ -4,11 +4,9 @@ The function twoSum should return indices of the two numbers such that they add 
 
 You may assume that each input would have exactly one solution.
 
-Input: numbers={2, 7, 11, 15}, target=9
-Output: index1=1, index2=2
 输入
 第一行为target
-剩下的每一行为一个整数
+剩下的每一行为一个整数 个数小于20000，大小小于100000000
 
 输出
 一行两个索引，用空格隔开，索引从0开始
