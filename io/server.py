@@ -19,11 +19,13 @@ Users = {};
 
 PairingUser = [];
 
-UserPairs = {};
+UserMatches = {};
+
+WorkingUsers = [];
 
 def Exchange(sid, pairSid, remainingTime):
     
-    if(sid in UserPairs and pairSid in UserPairs and remainingTime >= 0):
+    if((sid in WorkingUsers or pairSid in WorkingUsers) and remainingTime >= 0):
         print("Exchange.");
         sio.emit('Acquire', room=sid, namespace='/YueMa');
         sio.emit('Release', room=pairSid, namespace='/YueMa');
@@ -48,7 +50,16 @@ def connect(sid, environ):
 @sio.on('disconnect', namespace='/YueMa')
 def disconnect(sid):
     print("INFO_USER_DISCONNECTED: %s" % (sid));
-    del Users[sid];
+    try:
+        del Users[sid];
+        PairingUser.remove(sid);
+        pairSid = UserMatches[sid];
+        del UserMatches[sid];
+        del UserMatches[pairSid];
+        WorkingUsers.remove(sid);
+        WorkingUsers.remove(pairSid);
+    except Exception as err:
+        pass
 
 @sio.on('Ready', namespace='/YueMa')
 def start(sid, data):
@@ -64,9 +75,13 @@ def start(sid, data):
     elif(len(PairingUser) == 1):
         pairSid = PairingUser.pop();
 
-        UserPairs[pairSid] = sid;
-        UserPairs[sid] = pairSid;
+        UserMatches[pairSid] = sid;
+        UserMatches[sid] = pairSid;
 
+        WorkingUsers.append(sid);
+        WorkingUsers.append(pairSid);
+
+        # TODO: Load from question library.
         data = {
             'task': '<div><h2>Helloworld</h2><div>Complete a simple Helloworld program with your partner.</div></div>',
             'deadline': 30000,
@@ -77,18 +92,30 @@ def start(sid, data):
 
         Exchange(sid, pairSid, data['deadline']);
 
+@sio.on('Update', namespace='/YueMa')
+def update(sid, data):
+
+    pass
+    sio.emit('Update', data, room=UserMatches[sid], namespace='/YueMa');
+
+@sio.on('Commit', namespace='/YueMa')
+def commit(sid, data):
+
+    pass
+    sio.emit('Push', data, room=UserMatches[sid], namespace='/YueMa');
+
 @sio.on('Submit', namespace='/YueMa')
-def start(sid, data):
+def submit(sid, data):
     print("INFO_SUBMIT");
 
-    print(UserPairs);
+    print(WorkingUsers);
 
-    pairSid = UserPairs[UserPairs[sid]];
+    pairSid = UserMatches[sid];
 
-    del UserPairs[UserPairs[sid]];
-    del UserPairs[sid];
+    WorkingUsers.remove(sid);
+    WorkingUsers.remove(pairSid);
 
-    print(UserPairs);
+    print(WorkingUsers);
 
     data = {
         'score': 100,
@@ -96,6 +123,14 @@ def start(sid, data):
 
     sio.emit('Result', data, room=sid, namespace='/YueMa');
     sio.emit('Result', data, room=pairSid, namespace='/YueMa');
+
+@sio.on('Message', namespace='/YueMa')
+def message(sid, data):
+    print("INFO_SUBMIT");
+
+    pairSid = UserMatches[sid];
+
+    sio.emit('Message', data, room=pairSid, namespace='/YueMa');
 
 if __name__ == '__main__':
     app = socketio.Middleware(sio, app);
