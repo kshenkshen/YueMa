@@ -11,6 +11,7 @@ import subprocess
 import shutil
 import threading
 import random
+import re
 
 from threading import Thread
 from bottle import post, get, request, response
@@ -48,7 +49,7 @@ def _py_judge(pid, filename):
         run_proc.wait()
 
         retcode = run_proc.returncode
-        run_result = run_proc.stdout.read()
+        run_result = run_proc.stdout.read().rstrip()
 
         if retcode != 0:
             ret_dict['results'].append({'ac': False,
@@ -56,7 +57,8 @@ def _py_judge(pid, filename):
                                         'message': run_result})
             continue
 
-        right_ans = open("%s%s.output%d" % (IO_DIR, pid, i)).read()
+        right_ans = open("%s%s.output%d" % (IO_DIR, pid, i)).read().rstrip()
+
         if right_ans != run_result:
             ret_dict['results'].append({'ac': False,
                                         'err_code': 2,
@@ -83,7 +85,7 @@ def _c_judge(pid, filename):
     # compile
     run_proc = subprocess.Popen(["/usr/bin/gcc",
                                  '-O2',
-                                 '-o', filename.strip('.c'),
+                                 '-o', re.sub('\.c$', '', filename),
                                  filename],
                                 stderr=subprocess.STDOUT,
                                 stdout=subprocess.PIPE,
@@ -102,7 +104,7 @@ def _c_judge(pid, filename):
     for i in range(2):
         # execute
         run_proc = subprocess.Popen([LIMIT_RUN_PATH,
-                                     filename.strip('.c')],
+                                     re.sub('\.c$', '', filename)],
                                     stdin=subprocess.PIPE,
                                     stderr=subprocess.STDOUT,
                                     stdout=subprocess.PIPE,
@@ -112,9 +114,9 @@ def _c_judge(pid, filename):
         run_proc.stdin.write(in_str)
         run_proc.stdin.close()
         run_proc.wait()
-        run_result = run_proc.stdout.read()
+        run_result = run_proc.stdout.read().rstrip()
+        right_ans = open("%s%s.output%d" % (IO_DIR, pid, i)).read().rstrip()
 
-        right_ans = open("%s%s.output%d" % (IO_DIR, pid, i)).read()
         if right_ans != run_result:
             ret_dict['results'].append({'ac': False,
                                         'err_code': 2,
@@ -234,7 +236,7 @@ def random_pro(diff):
 
     pro_filename = random.choice(os.listdir(diff_dir))
     pro_desc = open(diff_dir + pro_filename).read()
-    return {'pid': int(pro_filename.strip('.txt')),
+    return {'pid': int(re.sub('\.txt$', '', pro_filename)),
             'desc': pro_desc}
 
 if __name__ == '__main__':
