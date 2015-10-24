@@ -1,0 +1,39 @@
+<html>
+	<head>
+		<title>IO</title>
+	</head>
+	<body>
+		<div>
+			
+		lalala.
+
+		</div>
+		<script type="text/javascript" src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+		<script type="text/javascript">
+
+		var namespace = "/YueMa";
+		var socket = io.connect("http://" + document.domain + ":" + location.port + namespace);
+
+		socket.on("connect", function() {
+
+			console.log("INFO_CONNECTED");
+
+			socket.emit("get_profile", {});
+
+		});
+
+		socket.on("error", function() {
+
+			console.log("ERROR_CONNECTING");
+
+		});
+
+		socket.on("profile", function(data) {
+
+			console.log(data);
+
+		});
+
+		</script>
+	</body>
+</html>
