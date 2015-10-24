@@ -30,7 +30,7 @@ code: base64编码后的代码
 
 success: 提交成功与否
 
-err_code: 错误信息, 0 代表 post body 不可解析, 1 代表 json 的键不符合要求, 2 代表 base64 解码错误
+err_code: 错误信息, 0 代表 post body 不可解析, 1 代表 json 的键不符合要求, 2 代表 base64 解码错误, 3 表示该 lang 不支持
 
 fid: 之后用于抓取本次 judge 结果的 md5 码
 
@@ -60,9 +60,13 @@ difficulty: 题目难度, 0-2
 ```json
 {
   "pid": 1,
-  "desc": "题目描述，没有标题"
+  "desc": "题目描述，没有标题",
+  "swt_time_range": [10, 20],
+  "total_time": 300
 }
 ```
 
 pid: 题目 id
 desc: 题目描述，没有标题
+swt_time_range: 一个人写一段代码的时间范围
+total_time: 一道题的上限时间

@@ -1,3 +1,4 @@
+10 20,450
 Given n points on a 2D plane, find the maximum number of points that lie on the same straight line.
 
 输入

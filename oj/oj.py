@@ -5,22 +5,23 @@ import bottle
 import json
 import time
 import hashlib
-import base64
 import os
 import subprocess
 import shutil
 import threading
 import random
 import re
+import oj
 
 from threading import Thread
 from bottle import post, get, request, response
 from apscheduler.schedulers.background import BackgroundScheduler
 
-LIMIT_RUN_PATH = './limitrun.sh'
-ROOT_DIR = './problems/'
-TEMP_DIR = ROOT_DIR + 'temp/'
-IO_DIR = ROOT_DIR + 'io/'
+OJ_PATH = os.path.dirname(oj.__file__) + '/'
+LIMIT_RUN_PATH = OJ_PATH + 'limitrun.sh'
+PRO_ROOT_DIR = OJ_PATH + 'problems/'
+TEMP_DIR = '/tmp/oj_tmp/'
+IO_DIR = PRO_ROOT_DIR + 'io/'
 
 JUDGE_QUEUE = []
 PROBLEMS_STATUS = {}
@@ -137,43 +138,32 @@ def _c_judge(pid, filename):
 def judge(pid, fid, code_str, lang):
     submit_dir = TEMP_DIR + fid + '/'
     if not os.path.exists(os.path.dirname(submit_dir)):
-        os.makedirs(os.path.dirname(submit_dir))
+        os.makedirs(os.path.dirname(submit_dir), 0777)
 
+    with STATUS_W_LOCK:
+        PROBLEMS_STATUS.setdefault(fid, {})
+        PROBLEMS_STATUS[fid]['ac'] = False
+        PROBLEMS_STATUS[fid]['status_code'] = 0
+
+    res = {}
     if lang == 'py':
         code_filename = submit_dir + fid + '.py'
         with open(code_filename, 'w') as f:
             f.write(code_str)
-
-        with STATUS_W_LOCK:
-            PROBLEMS_STATUS.setdefault(fid, {})
-            PROBLEMS_STATUS[fid]['ac'] = False
-            PROBLEMS_STATUS[fid]['status_code'] = 0
-
         res = _py_judge(pid, code_filename)
-
-        with STATUS_W_LOCK:
-            PROBLEMS_STATUS.setdefault(fid, {})
-            PROBLEMS_STATUS[fid]['ac'] = res['ac']
-            PROBLEMS_STATUS[fid]['status_code'] = 1
     elif lang == 'c':
         code_filename = submit_dir + fid + '.c'
         with open(code_filename, 'w') as f:
             f.write(code_str)
-
-        with STATUS_W_LOCK:
-            PROBLEMS_STATUS.setdefault(fid, {})
-            PROBLEMS_STATUS[fid]['ac'] = False
-            PROBLEMS_STATUS[fid]['status_code'] = 0
-
         res = _c_judge(pid, code_filename)
-
-        with STATUS_W_LOCK:
-            PROBLEMS_STATUS.setdefault(fid, {})
-            PROBLEMS_STATUS[fid]['ac'] = res['ac']
-            PROBLEMS_STATUS[fid]['status_code'] = 1
     else:
         # TODO other langs
         pass
+
+    with STATUS_W_LOCK:
+        PROBLEMS_STATUS.setdefault(fid, {})
+        PROBLEMS_STATUS[fid]['ac'] = res.get('ac', False)
+        PROBLEMS_STATUS[fid]['status_code'] = 1
 
     shutil.rmtree(submit_dir)
 
@@ -184,8 +174,13 @@ def _check_queue():
         Thread(target=judge, args=args).start()
 
 
+scheduler = BackgroundScheduler()
+scheduler.add_job(_check_queue, 'interval', seconds=1)
+scheduler.start()
+
+
 @post('/oj/submit/')
-def submit():
+def post_submit():
     # {'success': bool, 'err_code': int, 'fid': str}
     try:
         req_dict = json.loads(request.body.read())
@@ -194,18 +189,21 @@ def submit():
         return {'success': False,
                 'err_code': 0,
                 'fid': None}
+    return submit(req_dict)
 
+
+def submit(req_dict):
     if {'pid', 'code', 'lang'} != set(req_dict.keys()):
         response.status = 400
         return {'success': False,
                 'err_code': 1,
                 'fid': None}
 
-    try:
-        code_str = base64.b64decode(req_dict['code'])
-    except TypeError:
+    code_str = req_dict['code']
+
+    if req_dict['lang'] not in {'c', 'py'}:
         return {'success': False,
-                'err_code': 2,
+                'err_code': 3,
                 'fid': None}
 
     fid = hashlib.md5(code_str + str(time.time())).hexdigest()
@@ -225,24 +223,30 @@ def status(fid):
 
 @get('/oj/problems/random/:diff')
 def random_pro(diff):
-    # {'pid': int, 'desc': str}
+    # {'pid': int, 'desc': str, 'swt_time_range': list, 'total_time': int}
     diffs = [0, 1, 2]
     if int(diff) not in diffs:
-        return {'pid': None, 'desc': None}
+        return {}
 
-    diff_dir = ROOT_DIR + 'problems/%s/' % diff
+    diff_dir = PRO_ROOT_DIR + 'problems/%s/' % diff
     if not os.path.exists(diff_dir):
         os.makedirs(diff_dir)
 
     pro_filename = random.choice(os.listdir(diff_dir))
-    pro_desc = open(diff_dir + pro_filename).read()
+    with open(diff_dir + pro_filename) as f:
+        head = f.readline().rstrip()
+        pro_desc = f.read()
+
+        swt_time_range = map(int, head.split(',')[0].split(' '))
+        swt_time_range.sort()
+        total_time = int(head.split(',')[1])
+
     return {'pid': int(re.sub('\.txt$', '', pro_filename)),
-            'desc': pro_desc}
+            'desc': pro_desc,
+            'swt_time_range': swt_time_range,
+            'total_time': total_time}
 
 if __name__ == '__main__':
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(_check_queue, 'interval', seconds=1)
-    scheduler.start()
     app = bottle.app()
     bottle.debug(True)
     bottle.run(app=app)
