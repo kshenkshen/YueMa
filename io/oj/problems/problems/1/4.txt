@@ -1,3 +1,4 @@
+20 40,1000
 <p><strong>描述</strong></p>
 
 <p>Given an array of integers, find two numbers such that they add up to a specific target number.</p>

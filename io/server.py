@@ -6,32 +6,39 @@ from threading import Timer
 import socketio
 from flask import Flask
 
+from oj import oj
+
 PORT_SOCKETIO = 12345;
 
-def randomSeconds():
+def randomSeconds(min, max):
     random.seed();
-    return random.randint(5, 15);
+    return random.randint(min, max);
 
 sio = socketio.Server()
 app = Flask(__name__)
 
 Users = {};
 
-PairingUser = [];
+# Difficulty.
+PairingUser = {
+    0: [],
+    1: [],
+    2: [],
+};
 
 UserMatches = {};
 
 WorkingUsers = [];
 
-def Exchange(sid, pairSid, remainingTime):
+def Exchange(sid, pairSid, minTime, maxTime, remainingTime):
     
     if((sid in WorkingUsers or pairSid in WorkingUsers) and remainingTime >= 0):
         print("Exchange.");
         sio.emit('Acquire', room=sid, namespace='/YueMa');
         sio.emit('Release', room=pairSid, namespace='/YueMa');
-        seconds = randomSeconds();
+        seconds = randomSeconds(minTime, maxTime);
         print("Next exchange at %d." % (seconds));
-        Timer(seconds, Exchange, (pairSid, sid, remainingTime - seconds * 1000)).start();
+        Timer(seconds, Exchange, (pairSid, sid, minTime, maxTime, remainingTime - seconds * 1000)).start();
     else:
         print("Not exchange.");
 
@@ -52,7 +59,6 @@ def disconnect(sid):
     print("INFO_USER_DISCONNECTED: %s" % (sid));
     try:
         del Users[sid];
-        PairingUser.remove(sid);
         pairSid = UserMatches[sid];
         del UserMatches[sid];
         del UserMatches[pairSid];
@@ -69,11 +75,11 @@ def start(sid, data):
 
     print(Users);
 
-    if(len(PairingUser) == 0):
-        PairingUser.append(sid);
+    if(len(PairingUser[data['difficulty']]) == 0):
+        PairingUser[data['difficulty']].append(sid);
 
-    elif(len(PairingUser) == 1):
-        pairSid = PairingUser.pop();
+    elif(len(PairingUser[data['difficulty']]) == 1):
+        pairSid = PairingUser[data['difficulty']].pop();
 
         UserMatches[pairSid] = sid;
         UserMatches[sid] = pairSid;
@@ -81,16 +87,17 @@ def start(sid, data):
         WorkingUsers.append(sid);
         WorkingUsers.append(pairSid);
 
+        problem = oj.random_pro(data['difficulty']);
         # TODO: Load from question library.
         data = {
-            'task': '<div><h2>Helloworld</h2><div>Complete a simple Helloworld program with your partner.</div></div>',
-            'deadline': 30000,
+            'task': problem['desc'],
+            'deadline': problem['total_time'] * 1000,
         };
 
         sio.emit('Start', data, room=sid, namespace='/YueMa');
         sio.emit('Start', data, room=pairSid, namespace='/YueMa');
 
-        Exchange(sid, pairSid, data['deadline']);
+        Exchange(sid, pairSid, problem['swt_time_range'][0], problem['swt_time_range'][1], data['deadline']);
 
 @sio.on('Update', namespace='/YueMa')
 def update(sid, data):
