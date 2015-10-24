@@ -9,7 +9,7 @@
 			<button ms-click="ready()">Ready</button>
 			<div ms-html='task'></div>
 			<div>{{ countdown / 1000 }}</div>
-			<textarea ms-duplex="code" ms-input="update(event)"></textarea>
+			<textarea ms-attr-readonly="isLocked" ms-duplex="code" ms-input="update(event)"></textarea>
 			<button ms-click="submit()">Submit</button>
 			<div>{{ score }}</div>
 			<input type="text" ms-duplex="msg" /><br />
@@ -31,6 +31,7 @@
 			username: '',
 			task: '',
 			deadline: 0,
+			isLocked: false,
 			code: '',
 			countdown: 0,
 			score: 0,
@@ -105,6 +106,7 @@
 
 			console.log('Acquire');
 			console.log(data);
+			YueMa.isLocked = false;
 
 		});
 
@@ -121,6 +123,7 @@
 
 			console.log('Release');
 			console.log(data);
+			YueMa.isLocked = true;
 
 		});
 
