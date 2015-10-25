@@ -157,8 +157,12 @@ def yue(sid, data):
 
     if(Users[pairSid]['yue']):
 
-        sio.emit('Yue', {}, room=sid, namespace='/YueMa');
-        sio.emit('Yue', {}, room=pairSid, namespace='/YueMa');
+        sio.emit('Yue', {
+            'partnerName': Users[pairSid]['username'],
+        }, room=sid, namespace='/YueMa');
+        sio.emit('Yue', {
+            'partnerName': Users[sid]['username'],
+        }, room=pairSid, namespace='/YueMa');
 
 @sio.on('NoYue', namespace='/YueMa')
 def no_yue(sid, data):

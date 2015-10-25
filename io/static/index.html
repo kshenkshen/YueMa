@@ -165,8 +165,11 @@
 
 						<form action="javascript:void(0)">
 
-							<input type="text" class="form-control" ms-duplex="msg" />
-							
+							<div class="form-group">
+								<label>To {{ partnerName }}: </label>
+								<input type="text" class="form-control" ms-duplex="msg" />
+							</div>
+
 							<button type="button" class="btn btn-default" ms-click="message()">发送消息</button>
 
 						</form>
@@ -195,6 +198,7 @@
 			isLocked: false,
 			code: '',
 			countdown: 0,
+			partnerName: '',
 			msg: '',
 			ready: function() {
 				window.Socket.emit('Ready', {
@@ -316,6 +320,8 @@
 
 			console.log('Yue');
 			console.log(data);
+
+			YueMa.partnerName = data.partnerName;
 
 			alert("来来来约约约！");
 
