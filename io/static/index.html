@@ -317,7 +317,13 @@
 			console.log(data);
 
 			if(data.pass) alert("哇塞竟然通过了！");
-			else alert("很遗憾没有通过测试噢~");
+			else {
+
+				alert("很遗憾没有通过测试噢~");
+
+				location.reload();
+
+			}
 
 		});
 
