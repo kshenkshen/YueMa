@@ -76,7 +76,7 @@
 								
 								<form>
 
-									<div>{{ task }}</div>
+									<div ms-html="task"></div>
 									
 									<button type="button" class="btn btn-default" ms-click="submit()">提交</button>
 
@@ -99,7 +99,7 @@
 							<div class="panel-body">
 
 								<div class="progress">
-									<div class="progress-bar progress-bar-striped active" role="progressbar" ms-css-width="(countdown / deadline * 100) + '%'"></div>
+									<div class="progress-bar progress-bar-striped active" ms-class-progress-bar-warning="isLocked" ms-class-progress-bar-danger="!isLock && (countdown / deadline) < 0.3" ms-css-width="(countdown / deadline * 100) + '%'"></div>
 								</div>
 
 								<textarea style="width: 100%; height: 80%;" ms-attr-readonly="isLocked" ms-duplex="code" ms-input="update(event)"></textarea>
