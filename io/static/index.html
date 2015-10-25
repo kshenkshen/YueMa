@@ -228,6 +228,7 @@
 			noYue: function() {
 				window.Socket.emit('NoYue', {
 				});
+				location.reload();
 			},
 			message: function() {
 				window.Socket.emit('Message', {
@@ -315,7 +316,8 @@
 			console.log('Result');
 			console.log(data);
 
-			//YueMa.score = data.score;
+			if(data.pass) alert("哇塞竟然通过了！");
+			else alert("很遗憾没有通过测试噢~");
 
 		});
 
@@ -338,6 +340,8 @@
 			console.log(data);
 
 			alert("叔叔我们不约！");
+
+			location.reload();
 
 		});
 
