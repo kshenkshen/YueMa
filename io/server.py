@@ -179,8 +179,7 @@ def submit(sid, data):
                 sio.emit('Result', data, room=sid, namespace='/YueMa');
                 sio.emit('Result', data, room=pairSid, namespace='/YueMa');
 
-
-        Timer(2, rolling, (,)).start();
+        Timer(2, rolling, ()).start();
 
 @sio.on('Yue', namespace='/YueMa')
 def yue(sid, data):
