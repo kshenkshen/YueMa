@@ -59,6 +59,9 @@ def disconnect(sid):
     print("INFO_USER_DISCONNECTED: %s" % (sid));
     try:
         del Users[sid];
+        PairingUser[0].remove(sid);
+        PairingUser[1].remove(sid);
+        PairingUser[2].remove(sid);
         pairSid = UserMatches[sid];
         del UserMatches[sid];
         del UserMatches[pairSid];
@@ -68,14 +71,14 @@ def disconnect(sid):
         pass
 
 @sio.on('Ready', namespace='/YueMa')
-def start(sid, data):
+def ready(sid, data):
     print("INFO_READY");
 
     Users[sid]['username'] = data['username'];
 
     print(Users);
 
-    if(len(PairingUser[data['difficulty']]) == 0):
+    if(len(PairingUser[data['difficulty']]) == 0 and sid not in PairingUser[data['difficulty']]):
         PairingUser[data['difficulty']].append(sid);
 
     elif(len(PairingUser[data['difficulty']]) == 1):
