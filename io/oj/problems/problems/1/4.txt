@@ -1,0 +1,37 @@
+20 40,1000
+<p><strong>描述</strong></p>
+
+<p>Given an array of integers, find two numbers such that they add up to a specific target number.</p>
+
+<p>The function twoSum should return indices of the two numbers such that they add up to the target, where index1 must be less than index2. Please note that your returned answers (both index1 and index2) are not zero-based.</p>
+
+<p>You may assume that each input would have exactly one solution.</p>
+
+<p><strong>输入</strong></p>
+
+<p>第一行为target</p>
+
+<p>剩下的每一行为一个整数 个数小于20000，大小小于100000000</p>
+
+<p><strong>输出</strong></p>
+
+<p>一行两个索引，用空格隔开，索引从0开始</p>
+
+<p><strong>样例</strong></p>
+
+<p><strong>Input</strong></p>
+
+<p>9</p>
+
+<p>2</p>
+
+<p>7</p>
+
+<p>11</p>
+
+<p>15</p>
+
+<p><strong>Output</strong></p>
+
+<p>1 2</p>
+

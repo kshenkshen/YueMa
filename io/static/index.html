@@ -1,0 +1,365 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.css" />
+		<style type="text/css">
+                .btn{
+                    color: #ffffff;
+                    background: #27ab8d;
+                }
+
+		</style>
+		<title>YueMa</title>
+	</head>
+	<body ms-controller="YueMa">
+
+		<nav class="navbar navbar-default">
+			
+			<div class="container-fluid">
+				
+				<div class="collapse navbar-collapse" style="background: #27ab8d;">
+
+					<ul class="nav navbar-nav navbar-right">
+						
+						<li><a style="color: #FFF;">Guest</a></li>
+
+					</ul>
+
+				</div>
+
+			</div>
+
+		</nav>
+
+		<div class="row">
+			
+			<div id="start" class="col-sm-4 col-sm-offset-4" ms-visible="page == 'START'">
+				
+				<div class="panel panel-default">
+
+					<div class="panel-heading">
+						
+						<h2 class="panel-title">入口</h2>
+								
+					</div>
+					
+					<div class="panel-body">
+						
+						<form action="javascript:void(0)">
+
+							<div class="form-group">
+								<label for="username">请输入用户名：</label>
+								<input type="text" id="username" class="form-control" ms-duplex="username" /><br />
+							</div>
+							
+							<div class="form-group">
+								<label for="difficulty">请选择难度：</label>
+								<select id="difficulty" class="form-control" ms-duplex="difficulty" />
+									
+									<option value="0">简单</option>
+									<option value="1">一般</option>
+									<option value="2">困难</option>
+
+								</select>
+							</div>
+							
+							<button type="button" class="btn btn-default" ms-click="ready()">准备</button>
+
+						</form>
+
+					</div>
+					
+				</div>
+
+			</div>
+
+			<div id="match" class="col-sm-12" ms-visible="page == 'MATCH'">
+
+				<div class="row">
+					
+					<div id="task" class="col-sm-5">
+						
+						<div class="panel panel-default">
+
+							<div class="panel-heading">
+								
+								<h2 class="panel-title">任务</h2>
+								
+							</div>
+							
+							<div class="panel-body">
+								
+								<form action="javascript:void(0)">
+
+									<div ms-html="task"></div>
+									
+									<button type="button" class="btn btn-default" ms-click="submit()">提交</button>
+
+								</form>
+
+							</div>
+							
+						</div>
+
+					</div>
+
+					<div id="editor" class="col-sm-7">
+						
+						<div class="panel panel-default">
+
+							<div class="panel-heading">
+
+							</div>
+							
+							<div class="panel-body">
+
+								<div class="progress">
+									<div class="progress-bar progress-bar-striped" ms-class-active="!isLocked" ms-class-progress-bar-warning="isLocked" ms-class-progress-bar-danger="!isLocked && (countdown / deadline) < 0.3" ms-css-width="(countdown / deadline * 100) + '%'"></div>
+								</div>
+
+								<textarea style="width: 100%; height: 80%;" ms-attr-readonly="isLocked" ms-duplex="code" ms-input="update(event)"></textarea>
+
+							</div>
+							
+						</div>
+
+					</div>
+
+				</div>
+				
+			</div>
+
+			<div id="result" class="col-sm-4 col-sm-offset-4" ms-visible="page == 'RESULT'">
+				
+				<div class="panel panel-default">
+
+					<div class="panel-heading">
+
+					</div>
+					
+					<div class="panel-body">
+
+						<form action="javascript:void(0)">
+
+							<p>朋友，约吗？</p>
+
+							<button type="button" class="btn btn-default" ms-click="yue()">约</button>
+							<button type="button" class="btn btn-default" ms-click="noYue()">不约</button>
+
+						</form>
+
+					</div>
+					
+				</div>
+
+			</div>
+
+			<div id="yue" class="col-sm-4 col-sm-offset-4" ms-visible="page == 'YUE'">
+				
+				<div class="panel panel-default">
+
+					<div class="panel-heading">
+
+					</div>
+					
+					<div class="panel-body">
+
+						<form action="javascript:void(0)">
+
+							<div ms-repeat-el="messages">
+								<p>{{ partnerName }}: {{ el }}</p>
+							</div>
+
+							<div class="form-group">
+								<label>To {{ partnerName }}: </label>
+								<input type="text" class="form-control" ms-duplex="msg" />
+							</div>
+
+							<button type="button" class="btn btn-default" ms-click="message()">发送消息</button>
+
+						</form>
+
+					</div>
+					
+				</div>
+
+			</div>
+
+		</div>
+
+		<script type="text/javascript" src="/static/jquery.js"></script>
+		<script type="text/javascript" src="/static/bootstrap/js/bootstrap.js"></script>
+		<script type="text/javascript" src="/static/io.js"></script>
+		<script type="text/javascript" src="/static/avalon.js"></script>
+		<script type="text/javascript">
+
+		var YueMa = avalon.define({
+			$id: 'YueMa',
+			page: 'START',
+			username: '',
+			difficulty: '0',
+			task: '',
+			deadline: 0,
+			isLocked: false,
+			code: '',
+			countdown: 0,
+			partnerName: '',
+			msg: '',
+			messages: [],
+			ready: function() {
+				window.Socket.emit('Ready', {
+					username: YueMa.username,
+					difficulty: YueMa.difficulty,
+				});
+			},
+			update: function() {
+				window.Socket.emit('Push', {
+					code: YueMa.code
+				});
+			},
+			submit: function() {
+				window.Socket.emit('Submit', {
+					code: YueMa.code
+				});
+			},
+			yue: function() {
+				window.Socket.emit('Yue', {
+				});
+			},
+			noYue: function() {
+				window.Socket.emit('NoYue', {
+				});
+				location.reload();
+			},
+			message: function() {
+				window.Socket.emit('Message', {
+					message: YueMa.msg
+				});
+			},
+		})
+
+		var namespace = '/YueMa';
+		window.Socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
+
+		Socket.on('connect', function() {
+
+			console.log('INFO_CONNECTED');
+
+		});
+
+		Socket.on('error', function() {
+
+			console.log('ERROR_CONNECTING');
+
+		});
+
+		Socket.on('disconnect', function() {
+
+			console.log('INFO_DISCONNECTED');
+
+		});
+
+		Socket.on('Start', function(data) {
+
+			YueMa.page = 'MATCH';
+
+			console.log('Start');
+			console.log(data);
+			YueMa.task = data.task;
+			YueMa.deadline = data.deadline;
+			YueMa.countdown = data.deadline;
+
+			var countdown = function() {
+
+				YueMa.countdown -= 100;
+
+				if(YueMa.countdown >= 100) setTimeout(countdown, 100);
+				else {
+					YueMa.countdown = 0;
+					YueMa.submit();
+				}
+
+			};
+
+			countdown();
+
+		});
+
+		Socket.on('Acquire', function(data) {
+
+			console.log('Acquire');
+			console.log(data);
+			YueMa.isLocked = false;
+
+		});
+
+		Socket.on('Push', function(data) {
+
+			console.log('Push');
+			console.log(data);
+
+			YueMa.code = data.code;
+
+		});
+
+		Socket.on('Release', function(data) {
+
+			console.log('Release');
+			console.log(data);
+			YueMa.isLocked = true;
+
+		});
+
+		Socket.on('Result', function(data) {
+
+			YueMa.page = 'RESULT';
+
+			console.log('Result');
+			console.log(data);
+
+			if(data.pass) alert("哇塞竟然通过了！");
+			else {
+
+				alert("很遗憾没有通过测试噢~");
+
+				location.reload();
+
+			}
+
+		});
+
+		Socket.on('Yue', function(data) {
+
+			YueMa.page = 'YUE';
+
+			console.log('Yue');
+			console.log(data);
+
+			YueMa.partnerName = data.partnerName;
+
+			alert("来来来约约约！");
+
+		});
+
+		Socket.on('NoYue', function(data) {
+
+			console.log('NoYue');
+			console.log(data);
+
+			alert("叔叔我们不约！");
+
+			location.reload();
+
+		});
+
+		Socket.on('Message', function(data) {
+
+			console.log('Message');
+			console.log(data);
+
+			YueMa.messages.push(data.message);
+
+		});
+
+		</script>
+	</body>
+</html>
