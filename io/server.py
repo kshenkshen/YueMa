@@ -163,7 +163,12 @@ def submit(sid, data):
 
                 else:
 
-                    Timer(2, rolling, ()).start();
+                    data = {
+                        'pass': False,
+                    };
+
+                    sio.emit('Result', data, room=sid, namespace='/YueMa');
+                    sio.emit('Result', data, room=pairSid, namespace='/YueMa');
 
             except Exception as err:
 
@@ -175,7 +180,7 @@ def submit(sid, data):
                 sio.emit('Result', data, room=pairSid, namespace='/YueMa');
 
 
-        rolling();
+        Timer(2, rolling, (,)).start();
 
 @sio.on('Yue', namespace='/YueMa')
 def yue(sid, data):
