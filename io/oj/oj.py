@@ -206,7 +206,7 @@ def submit(req_dict):
                 'err_code': 3,
                 'fid': None}
 
-    fid = hashlib.md5(code_str + str(time.time())).hexdigest()
+    fid = hashlib.md5(code_str + str(random.random())).hexdigest()
     JUDGE_QUEUE.append([str(req_dict['pid']), fid, code_str, req_dict['lang']])
     return {'success': True,
             'err_code': None,

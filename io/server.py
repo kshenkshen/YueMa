@@ -31,7 +31,7 @@ UserMatches = {};
 WorkingUsers = [];
 
 def Exchange(sid, pairSid, minTime, maxTime, remainingTime):
-    
+
     if((sid in WorkingUsers or pairSid in WorkingUsers) and remainingTime >= 0):
         print("Exchange.");
         sio.emit('Acquire', room=sid, namespace='/YueMa');
@@ -152,7 +152,7 @@ def submit(sid, data):
 
             try:
 
-                if(oj.status(ret1['fid'])['status_code'] == 1 and oj.status(ret1['fid'])['status_code'] == 1):
+                if(oj.status(ret1['fid'])['status_code'] == 1 and oj.status(ret2['fid'])['status_code'] == 1):
 
                     data = {
                         'pass': oj.status(ret1['fid'])['ac'] or oj.status(ret2['fid'])['ac'],
