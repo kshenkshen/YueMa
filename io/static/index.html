@@ -16,15 +16,11 @@
 			
 			<div class="container-fluid">
 				
-				<div class="collapse navbar-collapse" style="
-                                      background: #27ab8d;
-                                      ">
+				<div class="collapse navbar-collapse" style="background: #27ab8d;">
 
 					<ul class="nav navbar-nav navbar-right">
 						
-						<li><a style="
-                                                      color: #FFF;
-                                                      ">Guest</a></li>
+						<li><a style="color: #FFF;">Guest</a></li>
 
 					</ul>
 
@@ -142,11 +138,34 @@
 					
 					<div class="panel-body">
 
-						<div>{{ score }}</div>
+						<form action="javascript:void(0)">
+
+							<p>朋友，约吗？</p>
+
+							<button type="button" class="btn btn-default" ms-click="yue()">约</button>
+							<button type="button" class="btn btn-default" ms-click="noYue()">不约</button>
+
+						</form>
+
+					</div>
+					
+				</div>
+
+			</div>
+
+			<div id="yue" class="col-md-4 col-md-offset-4" ms-visible="page == 'YUE'">
+				
+				<div class="panel panel-default">
+
+					<div class="panel-heading">
+
+					</div>
+					
+					<div class="panel-body">
 
 						<form action="javascript:void(0)">
 
-							<textarea ms-duplex="msg" style="height: 120px;"></textarea>
+							<input type="text" class="form-control" ms-duplex="msg" />
 							
 							<button type="button" class="btn btn-default" ms-click="message()">发送消息</button>
 
@@ -176,7 +195,6 @@
 			isLocked: false,
 			code: '',
 			countdown: 0,
-			score: 0,
 			msg: '',
 			ready: function() {
 				window.Socket.emit('Ready', {
@@ -190,7 +208,17 @@
 				});
 			},
 			submit: function() {
-				window.Socket.emit('Submit', {});
+				window.Socket.emit('Submit', {
+					code: YueMa.code
+				});
+			},
+			yue: function() {
+				window.Socket.emit('Yue', {
+				});
+			},
+			noYue: function() {
+				window.Socket.emit('NoYue', {
+				});
 			},
 			message: function() {
 				window.Socket.emit('Message', {
@@ -278,7 +306,27 @@
 			console.log('Result');
 			console.log(data);
 
-			YueMa.score = data.score;
+			//YueMa.score = data.score;
+
+		});
+
+		Socket.on('Yue', function(data) {
+
+			YueMa.page = 'YUE';
+
+			console.log('Yue');
+			console.log(data);
+
+			alert("来来来约约约！");
+
+		});
+
+		Socket.on('NoYue', function(data) {
+
+			console.log('NoYue');
+			console.log(data);
+
+			alert("叔叔我们不约！");
 
 		});
 

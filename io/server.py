@@ -51,7 +51,9 @@ def index():
 def connect(sid, environ):
     print("INFO_USER_CONNECTED: %s" % (sid));
     Users[sid] = {
-        'username': ''
+        'username': '',
+        'problem': {},
+        'yue': False,
     };
 
 @sio.on('disconnect', namespace='/YueMa')
@@ -91,6 +93,10 @@ def ready(sid, data):
         WorkingUsers.append(pairSid);
 
         problem = oj.random_pro(data['difficulty']);
+
+        Users[sid]['problem'] = problem;
+        Users[pairSid]['problem'] = problem;
+
         # TODO: Load from question library.
         data = {
             'task': problem['desc'],
@@ -128,12 +134,43 @@ def submit(sid, data):
 
         print(WorkingUsers);
 
-        data = {
-            'score': 100,
-        };
+        problem = Users[sid]['problem'];
+
+        oj.submit({
+            'pid': problem['pid'],
+            'lang': 'py',
+            'code': data['code'],
+        })
+
+        data = {};
 
         sio.emit('Result', data, room=sid, namespace='/YueMa');
         sio.emit('Result', data, room=pairSid, namespace='/YueMa');
+
+@sio.on('Yue', namespace='/YueMa')
+def yue(sid, data):
+    print("INFO_YUE");
+
+    pairSid = UserMatches[sid];
+
+    Users[sid]['yue'] = True;
+
+    if(Users[pairSid]['yue']):
+
+        sio.emit('Yue', {}, room=sid, namespace='/YueMa');
+        sio.emit('Yue', {}, room=pairSid, namespace='/YueMa');
+
+@sio.on('NoYue', namespace='/YueMa')
+def no_yue(sid, data):
+    print("INFO_NO_YUE");
+
+    pairSid = UserMatches[sid];
+
+    Users[sid]['yue'] = False;
+    Users[pairSid]['yue'] = False;
+
+    #sio.emit('NoYue', {}, room=sid, namespace='/YueMa');
+    sio.emit('NoYue', {}, room=pairSid, namespace='/YueMa');
 
 @sio.on('Evaluate', namespace='/YueMa')
 def evaluate(sid, data):
