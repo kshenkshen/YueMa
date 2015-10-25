@@ -118,17 +118,19 @@ def submit(sid, data):
 
     pairSid = UserMatches[sid];
 
-    WorkingUsers.remove(sid);
-    WorkingUsers.remove(pairSid);
+    if(sid in WorkingUsers):
+        WorkingUsers.remove(sid);
 
-    print(WorkingUsers);
+    if(pairSid not in WorkingUsers):
 
-    data = {
-        'score': 100,
-    };
+        print(WorkingUsers);
 
-    sio.emit('Result', data, room=sid, namespace='/YueMa');
-    sio.emit('Result', data, room=pairSid, namespace='/YueMa');
+        data = {
+            'score': 100,
+        };
+
+        sio.emit('Result', data, room=sid, namespace='/YueMa');
+        sio.emit('Result', data, room=pairSid, namespace='/YueMa');
 
 @sio.on('Evaluate', namespace='/YueMa')
 def evaluate(sid, data):
