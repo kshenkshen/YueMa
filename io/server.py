@@ -83,7 +83,7 @@ def ready(sid, data):
     if(len(PairingUser[data['difficulty']]) == 0 and sid not in PairingUser[data['difficulty']]):
         PairingUser[data['difficulty']].append(sid);
 
-    elif(len(PairingUser[data['difficulty']]) == 1):
+    elif(len(PairingUser[data['difficulty']]) == 1 and sid not in PairingUser[data['difficulty']]):
         pairSid = PairingUser[data['difficulty']].pop();
 
         UserMatches[pairSid] = sid;
