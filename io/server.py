@@ -21,9 +21,9 @@ Users = {};
 
 # Difficulty.
 PairingUser = {
-    0: [],
-    1: [],
-    2: [],
+    '0': [],
+    '1': [],
+    '2': [],
 };
 
 UserMatches = {};
@@ -61,9 +61,9 @@ def disconnect(sid):
     print("INFO_USER_DISCONNECTED: %s" % (sid));
     try:
         del Users[sid];
-        PairingUser[0].remove(sid);
-        PairingUser[1].remove(sid);
-        PairingUser[2].remove(sid);
+        PairingUser['0'].remove(sid);
+        PairingUser['1'].remove(sid);
+        PairingUser['2'].remove(sid);
         pairSid = UserMatches[sid];
         del UserMatches[sid];
         del UserMatches[pairSid];
@@ -136,16 +136,46 @@ def submit(sid, data):
 
         problem = Users[sid]['problem'];
 
-        oj.submit({
+        ret1 = oj.submit({
             'pid': problem['pid'],
             'lang': 'py',
             'code': data['code'],
-        })
+        });
 
-        data = {};
+        ret2 = oj.submit({
+            'pid': problem['pid'],
+            'lang': 'c',
+            'code': data['code'],
+        });
 
-        sio.emit('Result', data, room=sid, namespace='/YueMa');
-        sio.emit('Result', data, room=pairSid, namespace='/YueMa');
+        def rolling():
+
+            try:
+
+                if(oj.status(ret1['fid'])['status_code'] == 1 and oj.status(ret1['fid'])['status_code'] == 1):
+
+                    data = {
+                        'pass': oj.status(ret1['fid'])['ac'] or oj.status(ret2['fid'])['ac'],
+                    };
+
+                    sio.emit('Result', data, room=sid, namespace='/YueMa');
+                    sio.emit('Result', data, room=pairSid, namespace='/YueMa');
+
+                else:
+
+                    Timer(2, rolling, ()).start();
+
+            except Exception as err:
+
+                data = {
+                    'pass': False,
+                };
+
+                sio.emit('Result', data, room=sid, namespace='/YueMa');
+                sio.emit('Result', data, room=pairSid, namespace='/YueMa');
+
+
+        rolling();
 
 @sio.on('Yue', namespace='/YueMa')
 def yue(sid, data):
